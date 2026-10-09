@@ -15,5 +15,7 @@ public interface WorkspaceRepository {
 
     Workspace save(Workspace workspace);
 
+    void delete(Workspace workspace);
+
     List<Workspace> listForUser(UUID userId);
 }
