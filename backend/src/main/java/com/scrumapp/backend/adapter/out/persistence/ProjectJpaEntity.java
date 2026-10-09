@@ -27,7 +27,7 @@ public class ProjectJpaEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "key", nullable = false)
+    @Column(name = "project_key", nullable = false)
     private String key;
 
     @Column(name = "description")
