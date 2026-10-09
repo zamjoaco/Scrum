@@ -1,8 +1,7 @@
 package com.scrumapp.backend.adapter.in.web;
 
 import com.scrumapp.backend.adapter.in.web.dto.CreateProjectRequest;
-import com.scrumapp.backend.adapter.in.web.dto.PageMetadata;
-import com.scrumapp.backend.adapter.in.web.dto.ProjectPage;
+import com.scrumapp.backend.adapter.in.web.dto.PageResponse;
 import com.scrumapp.backend.adapter.in.web.dto.ProjectResponse;
 import com.scrumapp.backend.adapter.in.web.dto.UpdateProjectRequest;
 import com.scrumapp.backend.application.port.in.ArchiveProjectUseCase;
@@ -78,7 +77,7 @@ public class ProjectsController {
     }
 
     @GetMapping("/workspaces/{workspace_id}/projects")
-    public ProjectPage listProjects(
+    public PageResponse<ProjectResponse> listProjects(
             @PathVariable("workspace_id") UUID workspaceId,
             Authentication authentication,
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -89,16 +88,8 @@ public class ProjectsController {
 
             int safePage = Math.max(page, 0);
             int safeSize = size > 0 ? size : 20;
-            int totalElements = projects.size();
-            int totalPages = (int) Math.ceil((double) totalElements / safeSize);
-            int fromIndex = Math.min(safePage * safeSize, totalElements);
-            int toIndex = Math.min(fromIndex + safeSize, totalElements);
-
-            List<ProjectResponse> items = projects.subList(fromIndex, toIndex).stream()
-                    .map(ProjectResponse::from)
-                    .toList();
-            PageMetadata metadata = new PageMetadata(safePage, safeSize, totalElements, totalPages);
-            return new ProjectPage(items, metadata);
+            return PageResponse.of(
+                    projects.stream().map(ProjectResponse::from).toList(), safePage, safeSize);
         } catch (NotWorkspaceMemberException ex) {
             throw forbidden(ex);
         }
