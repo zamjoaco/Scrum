@@ -1,0 +1,214 @@
+# Schemas del dominio de workspaces (workspaces, miembros e invitaciones).
+# Convencion: schema en PascalCase, campos en snake_case en el wire.
+# El paginado reusa PageMetadata de common.yaml (ver docs/api/README.md).
+
+Workspace:
+  type: object
+  description: Espacio de trabajo que agrupa proyectos, sprints y miembros.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico del workspace.
+      example: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+    name:
+      type: string
+      description: Nombre legible del workspace.
+      example: Equipo Scrum
+    slug:
+      type: string
+      description: Identificador url-friendly unico del workspace.
+      example: equipo-scrum
+    owner_id:
+      type: string
+      format: uuid
+      description: Identificador del usuario propietario del workspace.
+      example: 9c858901-8a57-4791-81fe-4c455b099bc9
+    created_at:
+      type: string
+      format: date-time
+      description: Fecha y hora de creacion (ISO 8601, UTC).
+      example: '2026-01-15T09:30:00Z'
+  required:
+    - id
+    - name
+    - slug
+    - owner_id
+    - created_at
+
+WorkspaceMember:
+  type: object
+  description: Vinculo entre un usuario y un workspace, con su rol.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico de la membresia.
+      example: 1b645389-2473-4c9e-8d8a-6c0f4b0e2a11
+    workspace_id:
+      type: string
+      format: uuid
+      description: Workspace al que pertenece la membresia.
+      example: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+    user_id:
+      type: string
+      format: uuid
+      description: Usuario miembro del workspace.
+      example: 9c858901-8a57-4791-81fe-4c455b099bc9
+    role:
+      type: string
+      description: Rol del usuario dentro del workspace.
+      enum:
+        - OWNER
+        - ADMIN
+        - MEMBER
+        - VIEWER
+      example: MEMBER
+    joined_at:
+      type: string
+      format: date-time
+      description: Fecha y hora en que el usuario se unio al workspace.
+      example: '2026-01-15T09:35:00Z'
+  required:
+    - id
+    - workspace_id
+    - user_id
+    - role
+    - joined_at
+
+Invitation:
+  type: object
+  description: Invitacion pendiente para que un email se una a un workspace.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico de la invitacion.
+      example: 5c99f7a2-1d3e-4b6f-9a21-77e0c4d5b8aa
+    workspace_id:
+      type: string
+      format: uuid
+      description: Workspace al que invita la invitacion.
+      example: 3f2504e0-4f89-11d3-9a0c-0305e82c3301
+    email:
+      type: string
+      format: email
+      description: Email del invitado.
+      example: nuevo.miembro@example.com
+    role:
+      type: string
+      description: Rol que tendra el invitado si acepta.
+      enum:
+        - OWNER
+        - ADMIN
+        - MEMBER
+        - VIEWER
+      example: MEMBER
+    status:
+      type: string
+      description: Estado actual de la invitacion.
+      enum:
+        - PENDING
+        - ACCEPTED
+        - EXPIRED
+      example: PENDING
+    expires_at:
+      type: string
+      format: date-time
+      description: Fecha y hora de expiracion de la invitacion.
+      example: '2026-01-22T09:30:00Z'
+  required:
+    - id
+    - workspace_id
+    - email
+    - role
+    - status
+    - expires_at
+
+CreateWorkspaceRequest:
+  type: object
+  description: Datos para crear un workspace.
+  properties:
+    name:
+      type: string
+      description: Nombre legible del nuevo workspace.
+      example: Equipo Scrum
+  required:
+    - name
+
+UpdateWorkspaceRequest:
+  type: object
+  description: Datos actualizables de un workspace.
+  properties:
+    name:
+      type: string
+      description: Nuevo nombre legible del workspace.
+      example: Equipo Scrum Renombrado
+  required:
+    - name
+
+CreateInvitationRequest:
+  type: object
+  description: Datos para invitar a un email a un workspace.
+  properties:
+    email:
+      type: string
+      format: email
+      description: Email del invitado.
+      example: nuevo.miembro@example.com
+    role:
+      type: string
+      description: Rol propuesto para el invitado.
+      enum:
+        - OWNER
+        - ADMIN
+        - MEMBER
+        - VIEWER
+      example: MEMBER
+  required:
+    - email
+    - role
+
+UpdateMemberRoleRequest:
+  type: object
+  description: Nuevo rol para un miembro existente del workspace.
+  properties:
+    role:
+      type: string
+      description: Rol a asignar al miembro.
+      enum:
+        - OWNER
+        - ADMIN
+        - MEMBER
+        - VIEWER
+      example: ADMIN
+  required:
+    - role
+
+WorkspacePage:
+  type: object
+  description: Pagina de workspaces (items + metadata de paginacion).
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Workspace'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page
+
+WorkspaceMemberPage:
+  type: object
+  description: Pagina de miembros de un workspace (items + metadata de paginacion).
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/WorkspaceMember'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page

@@ -1,0 +1,100 @@
+# Rutas del recurso Board. Ver docs/api/README.md para la convencion de
+# referencias entre archivos y docs/api/openapi.yaml para como se enlaza
+# cada path desde el documento raiz.
+
+/projects/{project_id}/board:
+  get:
+    operationId: getProjectBoard
+    summary: Obtener el board de un proyecto con sus columnas y stories agrupadas.
+    tags: [Board]
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del proyecto cuyo board se consulta.
+    responses:
+      '200':
+        description: Vista completa del board (columnas + ids de stories por columna).
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/board.yaml#/BoardView'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/projects/{project_id}/board/columns:
+  post:
+    operationId: createBoardColumn
+    summary: Crear una columna nueva en el board de un proyecto.
+    tags: [Board]
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del proyecto cuyo board recibe la columna nueva.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/board.yaml#/CreateBoardColumnRequest'
+    responses:
+      '201':
+        description: Columna creada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/board.yaml#/BoardColumn'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/board/columns/{column_id}:
+  patch:
+    operationId: updateBoardColumn
+    summary: Actualizar nombre, orden y/o wip_limit de una columna del board.
+    tags: [Board]
+    parameters:
+      - name: column_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador de la columna del board.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/board.yaml#/UpdateBoardColumnRequest'
+    responses:
+      '200':
+        description: Columna actualizada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/board.yaml#/BoardColumn'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'

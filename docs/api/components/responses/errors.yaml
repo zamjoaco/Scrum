@@ -1,0 +1,39 @@
+# Respuestas de error reutilizables. Se enlazan desde openapi.yaml via
+# components.responses y desde cada paths/*.yaml via:
+#   '400':
+#     $ref: '../components/responses/errors.yaml#/BadRequest'
+
+BadRequest:
+  description: La solicitud es invalida (datos faltantes o mal formados).
+  content:
+    application/problem+json:
+      schema:
+        $ref: '../schemas/common.yaml#/ProblemDetail'
+
+Unauthorized:
+  description: No se proveyo un token valido, o el token expiro.
+  content:
+    application/problem+json:
+      schema:
+        $ref: '../schemas/common.yaml#/ProblemDetail'
+
+Forbidden:
+  description: El usuario autenticado no tiene permisos para esta operacion.
+  content:
+    application/problem+json:
+      schema:
+        $ref: '../schemas/common.yaml#/ProblemDetail'
+
+NotFound:
+  description: El recurso solicitado no existe.
+  content:
+    application/problem+json:
+      schema:
+        $ref: '../schemas/common.yaml#/ProblemDetail'
+
+Conflict:
+  description: La solicitud entra en conflicto con el estado actual del recurso.
+  content:
+    application/problem+json:
+      schema:
+        $ref: '../schemas/common.yaml#/ProblemDetail'

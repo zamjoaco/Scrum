@@ -1,0 +1,185 @@
+# Schemas del recurso UserStory. Ver docs/api/README.md para convenciones.
+
+UserStory:
+  type: object
+  description: >-
+    Una historia de usuario (UserStory). Pertenece a un Project y opcionalmente
+    a un Sprint; si sprint_id es null, la historia vive en el Product Backlog.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico de la historia.
+      example: 3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f
+    project_id:
+      type: string
+      format: uuid
+      description: Identificador del Project al que pertenece la historia.
+      example: 9b1f2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
+    sprint_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: >-
+        Identificador del Sprint al que esta asignada la historia. null si esta
+        en el Product Backlog.
+      example: null
+    status_id:
+      type: string
+      format: uuid
+      description: >-
+        Identificador de la BoardColumn que representa el estado actual de la
+        historia.
+      example: 5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d
+    assignee_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Identificador del usuario asignado. null si no esta asignada.
+      example: 7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a
+    created_by:
+      type: string
+      format: uuid
+      description: Identificador del usuario que creo la historia.
+      example: 8e9f0a1b-2c3d-4e5f-6a7b-8c9d0e1f2a3b
+    title:
+      type: string
+      description: Titulo de la historia.
+      example: Permitir pago con tarjeta guardada
+    description:
+      type: string
+      nullable: true
+      description: Descripcion detallada de la historia.
+      example: El usuario puede reusar una tarjeta ya guardada en su perfil.
+    story_points:
+      type: integer
+      format: int32
+      nullable: true
+      description: Estimacion en story points. null si aun no fue estimada.
+      example: 5
+    priority:
+      type: string
+      description: Prioridad de la historia.
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+        - CRITICAL
+      example: HIGH
+    created_at:
+      type: string
+      format: date-time
+      description: Fecha/hora de creacion de la historia.
+      example: 2026-01-15T10:30:00Z
+  required:
+    - id
+    - project_id
+    - status_id
+    - created_by
+    - title
+    - priority
+    - created_at
+
+UserStoryPage:
+  type: object
+  description: Envelope paginado de UserStory.
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/UserStory'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page
+
+CreateStoryRequest:
+  type: object
+  description: >-
+    Datos para crear una historia nueva dentro de un Project. La historia entra
+    al Product Backlog (sprint_id null).
+  properties:
+    title:
+      type: string
+      description: Titulo de la historia.
+      example: Permitir pago con tarjeta guardada
+    description:
+      type: string
+      nullable: true
+      description: Descripcion detallada de la historia.
+      example: El usuario puede reusar una tarjeta ya guardada en su perfil.
+    priority:
+      type: string
+      description: Prioridad de la historia.
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+        - CRITICAL
+      example: HIGH
+    story_points:
+      type: integer
+      format: int32
+      nullable: true
+      description: Estimacion en story points. null si aun no fue estimada.
+      example: 5
+  required:
+    - title
+
+UpdateStoryRequest:
+  type: object
+  description: >-
+    Datos editables de una historia existente (merge patch: solo se aplican los
+    campos presentes).
+  properties:
+    title:
+      type: string
+      description: Titulo de la historia.
+      example: Permitir pago con tarjeta guardada (v2)
+    description:
+      type: string
+      nullable: true
+      description: Descripcion detallada de la historia.
+      example: El usuario puede reusar una tarjeta ya guardada en su perfil.
+    priority:
+      type: string
+      description: Prioridad de la historia.
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+        - CRITICAL
+      example: CRITICAL
+    story_points:
+      type: integer
+      format: int32
+      nullable: true
+      description: Estimacion en story points. null si aun no fue estimada.
+      example: 8
+    assignee_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Identificador del usuario asignado. null para desasignar.
+      example: 7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a
+    sprint_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: >-
+        Identificador del Sprint al que asignar la historia. null para devolverla
+        al Product Backlog.
+      example: 2f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c
+
+MoveStoryRequest:
+  type: object
+  description: Datos para mover una historia a otra columna del tablero.
+  properties:
+    target_column_id:
+      type: string
+      format: uuid
+      description: Identificador de la BoardColumn destino.
+      example: 6b7c8d9e-0f1a-2b3c-4d5e-6f7a8b9c0d1e
+  required:
+    - target_column_id

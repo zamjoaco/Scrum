@@ -1,0 +1,163 @@
+# Rutas del recurso Project. Ver docs/api/README.md para la convencion de
+# referencias entre archivos y docs/api/openapi.yaml para como se enlaza
+# cada path desde el documento raiz.
+
+/workspaces/{workspace_id}/projects:
+  post:
+    operationId: createProject
+    summary: Crear un proyecto nuevo dentro de un workspace.
+    tags: [Projects]
+    parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del workspace donde se crea el proyecto.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/project.yaml#/CreateProjectRequest'
+    responses:
+      '201':
+        description: Proyecto creado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/project.yaml#/Project'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  get:
+    operationId: listProjects
+    summary: Listar los proyectos de un workspace (paginado).
+    tags: [Projects]
+    parameters:
+      - name: workspace_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del workspace cuyos proyectos se listan.
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+        description: Numero de pagina (0-indexado).
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+        description: Cantidad de elementos por pagina.
+    responses:
+      '200':
+        description: Pagina de proyectos del workspace.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/project.yaml#/ProjectPage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/projects/{project_id}:
+  get:
+    operationId: getProject
+    summary: Obtener un proyecto por id.
+    tags: [Projects]
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del proyecto.
+    responses:
+      '200':
+        description: Proyecto encontrado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/project.yaml#/Project'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  patch:
+    operationId: updateProject
+    summary: Actualizar nombre y/o descripcion de un proyecto.
+    tags: [Projects]
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del proyecto.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/project.yaml#/UpdateProjectRequest'
+    responses:
+      '200':
+        description: Proyecto actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/project.yaml#/Project'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  delete:
+    operationId: archiveProject
+    summary: Archivar un proyecto (soft-delete).
+    description: >-
+      Soft-delete: marca el proyecto como archivado seteando archived_at,
+      no elimina filas de la base de datos.
+    tags: [Projects]
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del proyecto.
+    responses:
+      '204':
+        description: Proyecto archivado correctamente, sin contenido en la respuesta.
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'

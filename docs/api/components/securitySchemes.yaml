@@ -1,0 +1,7 @@
+bearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: >-
+    JWT emitido por el endpoint de login (paths/auth.yaml). Enviar como
+    header "Authorization: Bearer <token>".

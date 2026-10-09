@@ -1,0 +1,83 @@
+# Schemas del recurso ActivityLogEntry. Ver docs/api/README.md para
+# convenciones.
+#
+# Nota de persistencia: ActivityLogEntry se persiste en MongoDB (no en la
+# base relacional), pero se expone igual via REST con estos schemas.
+# entity_type es un string libre (ej "story", "task", "project") y entity_id
+# es el uuid del recurso relacional al que se refiere la actividad.
+
+ActivityLogEntry:
+  type: object
+  description: >-
+    Una entrada del registro de actividad de un workspace/proyecto.
+    Persistido en MongoDB; id es un ObjectId de Mongo, no un uuid.
+  properties:
+    id:
+      type: string
+      description: Identificador unico de la entrada de actividad (ObjectId de Mongo).
+      example: 65f1a2b3c4d5e6f7a8b9c0d2
+    workspace_id:
+      type: string
+      format: uuid
+      description: Identificador del workspace donde ocurrio la actividad.
+      example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+    project_id:
+      type: string
+      format: uuid
+      description: Identificador del proyecto donde ocurrio la actividad.
+      example: 9b1f2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
+    entity_type:
+      type: string
+      description: Tipo de entidad sobre la que ocurrio la actividad.
+      example: story
+    entity_id:
+      type: string
+      format: uuid
+      description: Identificador de la entidad relacional sobre la que ocurrio la actividad.
+      example: 2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e
+    action:
+      type: string
+      description: Accion registrada, en formato "<entidad>.<verbo>".
+      example: story.moved
+    actor_id:
+      type: string
+      format: uuid
+      description: Identificador del usuario que realizo la accion.
+      example: 3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f
+    payload:
+      type: object
+      additionalProperties: true
+      description: Datos adicionales libres asociados a la accion, dependen del tipo de accion.
+      example:
+        from_status: in_progress
+        to_status: done
+    created_at:
+      type: string
+      format: date-time
+      description: Fecha/hora en que ocurrio la actividad.
+      example: 2026-01-15T10:30:00Z
+  required:
+    - id
+    - workspace_id
+    - project_id
+    - entity_type
+    - entity_id
+    - action
+    - actor_id
+    - created_at
+
+ActivityLogPage:
+  type: object
+  description: >-
+    Envelope paginado de ActivityLogEntry. Los items vienen ordenados por
+    created_at descendente (la actividad mas reciente primero).
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/ActivityLogEntry'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page

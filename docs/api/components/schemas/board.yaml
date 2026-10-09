@@ -1,0 +1,135 @@
+# Schemas del recurso Board. Ver docs/api/README.md para convenciones.
+# Nota: BoardView referencia solo story_ids (uuid), nunca el objeto UserStory
+# completo, para no duplicar el schema que define components/schemas/story.yaml.
+
+Board:
+  type: object
+  description: El tablero Kanban/Scrum de un Project.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico del board.
+      example: 3f4a5b6c-7d8e-9f0a-1b2c-3d4e5f6a7b8c
+    project_id:
+      type: string
+      format: uuid
+      description: Identificador del Project al que pertenece el board.
+      example: 9b1f2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
+    name:
+      type: string
+      description: Nombre del board.
+      example: Board principal
+  required:
+    - id
+    - project_id
+    - name
+
+BoardColumn:
+  type: object
+  description: Una columna configurable del board, representa un estado del flujo.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico de la columna.
+      example: 4a5b6c7d-8e9f-0a1b-2c3d-4e5f6a7b8c9d
+    board_id:
+      type: string
+      format: uuid
+      description: Identificador del Board al que pertenece la columna.
+      example: 3f4a5b6c-7d8e-9f0a-1b2c-3d4e5f6a7b8c
+    name:
+      type: string
+      description: Nombre de la columna.
+      example: En progreso
+    order_index:
+      type: integer
+      format: int32
+      description: Posicion de la columna dentro del board (0-indexado).
+      example: 1
+    wip_limit:
+      type: integer
+      format: int32
+      nullable: true
+      description: Limite de work-in-progress para la columna. null si no hay limite.
+      example: 5
+  required:
+    - id
+    - board_id
+    - name
+    - order_index
+
+BoardView:
+  type: object
+  description: >-
+    Vista completa del board de un proyecto, con sus columnas y las stories
+    agrupadas por columna (solo ids, no el objeto UserStory completo).
+  properties:
+    board:
+      $ref: '#/Board'
+    columns:
+      type: array
+      items:
+        type: object
+        properties:
+          column:
+            $ref: '#/BoardColumn'
+          story_ids:
+            type: array
+            items:
+              type: string
+              format: uuid
+            description: Ids de las UserStory asignadas a esta columna, en orden.
+        required:
+          - column
+          - story_ids
+  required:
+    - board
+    - columns
+
+CreateBoardColumnRequest:
+  type: object
+  description: Datos para crear una columna nueva en el board de un proyecto.
+  properties:
+    name:
+      type: string
+      description: Nombre de la columna.
+      example: En revision
+    order_index:
+      type: integer
+      format: int32
+      description: Posicion de la columna dentro del board (0-indexado).
+      example: 2
+    wip_limit:
+      type: integer
+      format: int32
+      nullable: true
+      description: Limite de work-in-progress para la columna. null si no hay limite.
+      example: 3
+  required:
+    - name
+    - order_index
+
+UpdateBoardColumnRequest:
+  type: object
+  description: Datos editables de una columna existente del board.
+  properties:
+    name:
+      type: string
+      description: Nombre de la columna.
+      example: En revision tecnica
+    order_index:
+      type: integer
+      format: int32
+      description: Posicion de la columna dentro del board (0-indexado).
+      example: 2
+    wip_limit:
+      type: integer
+      format: int32
+      nullable: true
+      description: Limite de work-in-progress para la columna. null si no hay limite.
+      example: 4
+  required:
+    - name
+    - order_index

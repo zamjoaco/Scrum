@@ -1,0 +1,57 @@
+# Schemas del dominio de usuarios. Convencion: schema en PascalCase,
+# campos en snake_case en el wire. Ver docs/api/README.md.
+
+User:
+  type: object
+  description: Usuario de la aplicacion.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico del usuario.
+      example: 9c858901-8a57-4791-81fe-4c455b099bc9
+    email:
+      type: string
+      format: email
+      description: Correo electronico unico del usuario.
+      example: ana.gomez@example.com
+    first_names:
+      type: string
+      description: Nombres de pila del usuario.
+      example: Ana Maria
+    last_names:
+      type: string
+      description: Apellidos del usuario.
+      example: Gomez
+    is_active:
+      type: boolean
+      description: Indica si la cuenta esta activa.
+      example: true
+    created_at:
+      type: string
+      format: date-time
+      description: Fecha y hora de creacion de la cuenta (ISO 8601, UTC).
+      example: '2026-01-15T09:30:00Z'
+  required:
+    - id
+    - email
+    - first_names
+    - last_names
+    - is_active
+    - created_at
+
+UpdateUserRequest:
+  type: object
+  description: Datos actualizables del perfil del usuario autenticado.
+  properties:
+    first_names:
+      type: string
+      description: Nuevos nombres de pila del usuario.
+      example: Ana Maria
+    last_names:
+      type: string
+      description: Nuevos apellidos del usuario.
+      example: Gomez Perez
+  required:
+    - first_names
+    - last_names

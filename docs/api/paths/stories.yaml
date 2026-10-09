@@ -1,0 +1,209 @@
+# Path Item Objects del recurso UserStory (stories) y sus endpoints de tareas
+# anidados. Ver docs/api/README.md para la convencion de referencias.
+# bearerAuth aplica globalmente (ver openapi.yaml).
+
+/projects/{project_id}/stories:
+  parameters:
+    - name: project_id
+      in: path
+      required: true
+      description: Identificador del Project.
+      schema:
+        type: string
+        format: uuid
+  post:
+    tags:
+      - stories
+    operationId: createStory
+    summary: Crear una historia nueva en un proyecto
+    description: >-
+      Crea una UserStory dentro del Project indicado. La historia entra al
+      Product Backlog (sprint_id queda null).
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/story.yaml#/CreateStoryRequest'
+    responses:
+      '201':
+        description: Historia creada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/story.yaml#/UserStory'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  get:
+    tags:
+      - stories
+    operationId: listStories
+    summary: Listar historias de un proyecto
+    description: >-
+      Devuelve las UserStory de un Project de forma paginada. Sin filtros,
+      devuelve todas las historias del proyecto (backlog + sprints).
+    parameters:
+      - name: sprint_id
+        in: query
+        required: false
+        description: >-
+          Filtra por Sprint. Omitilo para traer todas las historias del
+          proyecto; pasalo como null (sprint_id=null) para traer solo las del
+          Product Backlog; pasalo con un uuid para traer las de ese sprint.
+        schema:
+          type: string
+          format: uuid
+          nullable: true
+      - name: status_id
+        in: query
+        required: false
+        description: Filtra por la BoardColumn (estado) actual de la historia.
+        schema:
+          type: string
+          format: uuid
+      - name: page
+        in: query
+        required: false
+        description: Numero de pagina, 0-indexado.
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        description: Cantidad de elementos por pagina.
+        schema:
+          type: integer
+          format: int32
+          default: 20
+    responses:
+      '200':
+        description: Pagina de historias del proyecto.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/story.yaml#/UserStoryPage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/stories/{story_id}:
+  parameters:
+    - name: story_id
+      in: path
+      required: true
+      description: Identificador de la UserStory.
+      schema:
+        type: string
+        format: uuid
+  get:
+    tags:
+      - stories
+    operationId: getStory
+    summary: Obtener una historia
+    responses:
+      '200':
+        description: Historia encontrada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/story.yaml#/UserStory'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  patch:
+    tags:
+      - stories
+    operationId: updateStory
+    summary: Actualizar parcialmente una historia
+    description: >-
+      Aplica un merge patch: solo se modifican los campos presentes en el body.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/story.yaml#/UpdateStoryRequest'
+    responses:
+      '200':
+        description: Historia actualizada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/story.yaml#/UserStory'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  delete:
+    tags:
+      - stories
+    operationId: deleteStory
+    summary: Eliminar una historia
+    responses:
+      '204':
+        description: Historia eliminada.
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/stories/{story_id}/move:
+  parameters:
+    - name: story_id
+      in: path
+      required: true
+      description: Identificador de la UserStory a mover.
+      schema:
+        type: string
+        format: uuid
+  post:
+    tags:
+      - stories
+    operationId: moveStory
+    summary: Mover una historia a otra columna del tablero
+    description: >-
+      Mueve la historia a la BoardColumn destino. Falla con 409 si el wip_limit
+      de la columna destino ya esta al limite.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/story.yaml#/MoveStoryRequest'
+    responses:
+      '200':
+        description: Historia movida.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/story.yaml#/UserStory'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses/errors.yaml#/Conflict'

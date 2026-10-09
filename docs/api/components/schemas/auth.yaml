@@ -1,0 +1,117 @@
+# Schemas del dominio de autenticacion. Convencion: schema en PascalCase,
+# campos en snake_case en el wire. Ver docs/api/README.md.
+
+AuthTokens:
+  type: object
+  description: Par de tokens JWT emitidos al autenticarse o refrescar la sesion.
+  properties:
+    access_token:
+      type: string
+      description: Token de acceso JWT para autenticar peticiones (bearerAuth).
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjMifQ.s3cr3t
+    refresh_token:
+      type: string
+      description: Token de refresco usado para obtener un nuevo access_token.
+      example: dGhpcy1pcy1hLXJlZnJlc2gtdG9rZW4.dQw4w9Wg
+    token_type:
+      type: string
+      description: Tipo de token segun RFC 6749, siempre "Bearer".
+      default: Bearer
+      example: Bearer
+    expires_in:
+      type: integer
+      format: int32
+      description: Tiempo de vida del access_token en segundos.
+      example: 3600
+  required:
+    - access_token
+    - refresh_token
+    - token_type
+    - expires_in
+
+RegisterRequest:
+  type: object
+  description: Datos requeridos para registrar un nuevo usuario.
+  properties:
+    first_names:
+      type: string
+      description: Nombres de pila del usuario.
+      example: Ana Maria
+    last_names:
+      type: string
+      description: Apellidos del usuario.
+      example: Gomez
+    email:
+      type: string
+      format: email
+      description: Correo electronico unico del usuario.
+      example: ana.gomez@example.com
+    password:
+      type: string
+      format: password
+      minLength: 8
+      description: Contrasena en texto plano (se hashea en el backend).
+      example: S3cretPassw0rd!
+  required:
+    - first_names
+    - last_names
+    - email
+    - password
+
+LoginRequest:
+  type: object
+  description: Credenciales para iniciar sesion.
+  properties:
+    email:
+      type: string
+      format: email
+      example: ana.gomez@example.com
+    password:
+      type: string
+      format: password
+      example: S3cretPassw0rd!
+  required:
+    - email
+    - password
+
+RefreshRequest:
+  type: object
+  description: Solicitud de un nuevo par de tokens a partir de un refresh token.
+  properties:
+    refresh_token:
+      type: string
+      description: Refresh token previamente emitido.
+      example: dGhpcy1pcy1hLXJlZnJlc2gtdG9rZW4.dQw4w9Wg
+  required:
+    - refresh_token
+
+PasswordResetRequest:
+  type: object
+  description: >-
+    Solicitud de restablecimiento de contrasena. La respuesta es siempre
+    generica para no revelar si el email existe.
+  properties:
+    email:
+      type: string
+      format: email
+      example: ana.gomez@example.com
+  required:
+    - email
+
+PasswordResetConfirmRequest:
+  type: object
+  description: Confirmacion del restablecimiento con el token recibido por email.
+  properties:
+    token:
+      type: string
+      description: Token de un solo uso recibido por email.
+      example: 7f3b2c1a-9e4d-4a2b-8c3e-1d2f3a4b5c6d
+    new_password:
+      type: string
+      format: password
+      minLength: 8
+      description: Nueva contrasena en texto plano.
+      example: N3wPassw0rd!
+  required:
+    - token
+    - new_password

@@ -1,0 +1,99 @@
+# Schemas del recurso Project. Ver docs/api/README.md para convenciones.
+
+Project:
+  type: object
+  description: Un proyecto dentro de un Workspace.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico del proyecto.
+      example: 9b1f2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
+    workspace_id:
+      type: string
+      format: uuid
+      description: Identificador del Workspace al que pertenece el proyecto.
+      example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+    name:
+      type: string
+      description: Nombre del proyecto.
+      example: Rediseno del checkout
+    key:
+      type: string
+      description: Clave corta del proyecto, usada como prefijo de las stories.
+      example: CHK
+    description:
+      type: string
+      nullable: true
+      description: Descripcion detallada del proyecto.
+      example: Proyecto para migrar el checkout al nuevo flujo de pagos.
+    archived_at:
+      type: string
+      format: date-time
+      nullable: true
+      description: >-
+        Fecha/hora en que el proyecto fue archivado (soft-delete). null si el
+        proyecto esta activo.
+      example: null
+    created_at:
+      type: string
+      format: date-time
+      description: Fecha/hora de creacion del proyecto.
+      example: 2026-01-15T10:30:00Z
+  required:
+    - id
+    - workspace_id
+    - name
+    - key
+    - created_at
+
+ProjectPage:
+  type: object
+  description: Envelope paginado de Project.
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Project'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page
+
+CreateProjectRequest:
+  type: object
+  description: Datos para crear un proyecto nuevo dentro de un Workspace.
+  properties:
+    name:
+      type: string
+      description: Nombre del proyecto.
+      example: Rediseno del checkout
+    key:
+      type: string
+      description: Clave corta del proyecto, usada como prefijo de las stories.
+      example: CHK
+    description:
+      type: string
+      nullable: true
+      description: Descripcion detallada del proyecto.
+      example: Proyecto para migrar el checkout al nuevo flujo de pagos.
+  required:
+    - name
+    - key
+
+UpdateProjectRequest:
+  type: object
+  description: Datos editables de un proyecto existente.
+  properties:
+    name:
+      type: string
+      description: Nombre del proyecto.
+      example: Rediseno del checkout v2
+    description:
+      type: string
+      nullable: true
+      description: Descripcion detallada del proyecto.
+      example: Proyecto para migrar el checkout al nuevo flujo de pagos.
+  required:
+    - name
