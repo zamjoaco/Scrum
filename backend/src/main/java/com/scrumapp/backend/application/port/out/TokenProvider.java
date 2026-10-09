@@ -13,6 +13,12 @@ public interface TokenProvider {
     TokenClaims parseAndValidate(String token);
 
     /**
+     * Vida util del access token en segundos, usada para informar
+     * expires_in en las respuestas de autenticacion.
+     */
+    long accessTokenTtlSeconds();
+
+    /**
      * Claims minimos extraidos de un access token valido.
      */
     record TokenClaims(UUID userId, Instant expiresAt) {

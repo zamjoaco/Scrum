@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,7 +31,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper)
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http, ObjectMapper objectMapper, JwtAuthenticationFilter jwtAuthenticationFilter)
             throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -53,8 +55,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(problemDetailAuthenticationEntryPoint(objectMapper))
                         .accessDeniedHandler(problemDetailAccessDeniedHandler(objectMapper)));
 
-        // Aca debe enganchar el filtro de JWT real (lo agrega el worker de Auth),
-        // por ejemplo: .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

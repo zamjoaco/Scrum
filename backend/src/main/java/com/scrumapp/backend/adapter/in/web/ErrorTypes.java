@@ -14,6 +14,7 @@ public final class ErrorTypes {
     public static final String NOT_FOUND = BASE + "not-found";
     public static final String CONFLICT = BASE + "conflict";
     public static final String VALIDATION_ERROR = BASE + "validation-error";
+    public static final String RATE_LIMITED = BASE + "rate-limited";
 
     private ErrorTypes() {
     }
