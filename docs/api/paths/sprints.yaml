@@ -1,0 +1,205 @@
+# Rutas del recurso Sprint. Ver docs/api/README.md para la convencion de
+# referencias entre archivos y docs/api/openapi.yaml para como se enlaza
+# cada path desde el documento raiz.
+
+/projects/{project_id}/sprints:
+  post:
+    operationId: createSprint
+    summary: Crear un sprint nuevo dentro de un proyecto.
+    tags: [Sprints]
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del proyecto donde se crea el sprint.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/sprint.yaml#/CreateSprintRequest'
+    responses:
+      '201':
+        description: Sprint creado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sprint.yaml#/Sprint'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  get:
+    operationId: listSprints
+    summary: Listar los sprints de un proyecto (paginado).
+    tags: [Sprints]
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del proyecto cuyos sprints se listan.
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+        description: Numero de pagina (0-indexado).
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+        description: Cantidad de elementos por pagina.
+    responses:
+      '200':
+        description: Pagina de sprints del proyecto.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sprint.yaml#/SprintPage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/sprints/{sprint_id}:
+  get:
+    operationId: getSprint
+    summary: Obtener un sprint por id.
+    tags: [Sprints]
+    parameters:
+      - name: sprint_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del sprint.
+    responses:
+      '200':
+        description: Sprint encontrado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sprint.yaml#/Sprint'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  patch:
+    operationId: updateSprint
+    summary: Actualizar nombre, objetivo y/o fechas de un sprint.
+    tags: [Sprints]
+    parameters:
+      - name: sprint_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del sprint.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/sprint.yaml#/UpdateSprintRequest'
+    responses:
+      '200':
+        description: Sprint actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sprint.yaml#/Sprint'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/sprints/{sprint_id}/start:
+  post:
+    operationId: startSprint
+    summary: Iniciar un sprint, pasando su status a ACTIVE.
+    description: >-
+      Falla con 409 si ya existe otro sprint activo en el mismo proyecto, o
+      si el sprint ya habia sido iniciado previamente.
+    tags: [Sprints]
+    parameters:
+      - name: sprint_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del sprint a iniciar.
+    responses:
+      '200':
+        description: Sprint iniciado, status pasa a ACTIVE.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sprint.yaml#/Sprint'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses/errors.yaml#/Conflict'
+
+/sprints/{sprint_id}/close:
+  post:
+    operationId: closeSprint
+    summary: Cerrar un sprint, pasando su status a CLOSED.
+    description: >-
+      Al cerrar el sprint, las stories no completadas vuelven al backlog
+      (su sprint_id pasa a null).
+    tags: [Sprints]
+    parameters:
+      - name: sprint_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del sprint a cerrar.
+    responses:
+      '200':
+        description: >-
+          Sprint cerrado, status pasa a CLOSED. Las stories no completadas
+          vuelven al backlog (sprint_id a null).
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/sprint.yaml#/Sprint'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses/errors.yaml#/Conflict'

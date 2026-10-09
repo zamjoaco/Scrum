@@ -1,0 +1,309 @@
+# Paths del recurso workspaces (workspaces, miembros e invitaciones).
+# Convencion: cada clave de primer nivel es el path completo y su valor el
+# Path Item Object estandar de OpenAPI. Ver docs/api/README.md.
+# Todas las operaciones requieren bearerAuth (JWT).
+
+/workspaces:
+  post:
+    tags:
+      - Workspaces
+    summary: Crear un workspace
+    description: Crea un workspace cuyo propietario es el usuario autenticado.
+    operationId: createWorkspace
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/workspace.yaml#/CreateWorkspaceRequest'
+    responses:
+      '201':
+        description: Workspace creado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/workspace.yaml#/Workspace'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+  get:
+    tags:
+      - Workspaces
+    summary: Listar workspaces del usuario autenticado
+    description: Devuelve, paginado, los workspaces a los que pertenece el usuario autenticado.
+    operationId: listWorkspaces
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: page
+        in: query
+        required: false
+        description: Numero de pagina, 0-indexado.
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          default: 0
+      - name: size
+        in: query
+        required: false
+        description: Cantidad de elementos por pagina.
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 20
+    responses:
+      '200':
+        description: Listado paginado de workspaces.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/workspace.yaml#/WorkspacePage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+
+/workspaces/{workspace_id}:
+  get:
+    tags:
+      - Workspaces
+    summary: Obtener un workspace
+    description: Devuelve un workspace por su id; el usuario debe ser miembro.
+    operationId: getWorkspace
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    responses:
+      '200':
+        description: Workspace encontrado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/workspace.yaml#/Workspace'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  patch:
+    tags:
+      - Workspaces
+    summary: Actualizar un workspace
+    description: Actualiza el nombre del workspace.
+    operationId: updateWorkspace
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/workspace.yaml#/UpdateWorkspaceRequest'
+    responses:
+      '200':
+        description: Workspace actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/workspace.yaml#/Workspace'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  delete:
+    tags:
+      - Workspaces
+    summary: Eliminar un workspace
+    description: Elimina el workspace y sus datos asociados.
+    operationId: deleteWorkspace
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    responses:
+      '204':
+        description: Workspace eliminado. Sin contenido.
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/workspaces/{workspace_id}/members:
+  get:
+    tags:
+      - Workspaces
+    summary: Listar miembros de un workspace
+    description: Devuelve, paginado, los miembros del workspace.
+    operationId: listWorkspaceMembers
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: page
+        in: query
+        required: false
+        description: Numero de pagina, 0-indexado.
+        schema:
+          type: integer
+          format: int32
+          minimum: 0
+          default: 0
+      - name: size
+        in: query
+        required: false
+        description: Cantidad de elementos por pagina.
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+          default: 20
+    responses:
+      '200':
+        description: Listado paginado de miembros.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/workspace.yaml#/WorkspaceMemberPage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/workspaces/{workspace_id}/invitations:
+  post:
+    tags:
+      - Workspaces
+    summary: Invitar a un email a un workspace
+    description: Crea una invitacion pendiente para el email indicado.
+    operationId: createInvitation
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/workspace.yaml#/CreateInvitationRequest'
+    responses:
+      '201':
+        description: Invitacion creada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/workspace.yaml#/Invitation'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/invitations/{token}/accept:
+  post:
+    tags:
+      - Workspaces
+    summary: Aceptar una invitacion
+    description: >-
+      Acepta la invitacion identificada por su token; el usuario autenticado
+      se incorpora al workspace.
+    operationId: acceptInvitation
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: token
+        in: path
+        required: true
+        description: Token de la invitacion.
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Invitacion aceptada; devuelve la membresia creada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/workspace.yaml#/WorkspaceMember'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+      '409':
+        $ref: '../components/responses/errors.yaml#/Conflict'
+
+/workspaces/{workspace_id}/members/{user_id}:
+  patch:
+    tags:
+      - Workspaces
+    summary: Actualizar el rol de un miembro
+    description: Cambia el rol de un miembro dentro del workspace.
+    operationId: updateMemberRole
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/UserId'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/workspace.yaml#/UpdateMemberRoleRequest'
+    responses:
+      '200':
+        description: Membresia actualizada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/workspace.yaml#/WorkspaceMember'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  delete:
+    tags:
+      - Workspaces
+    summary: Quitar un miembro del workspace
+    description: Elimina la membresia del usuario indicado en el workspace.
+    operationId: removeMember
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/UserId'
+    responses:
+      '204':
+        description: Miembro removido. Sin contenido.
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+components:
+  parameters:
+    WorkspaceId:
+      name: workspace_id
+      in: path
+      required: true
+      description: Identificador del workspace.
+      schema:
+        type: string
+        format: uuid
+    UserId:
+      name: user_id
+      in: path
+      required: true
+      description: Identificador del usuario.
+      schema:
+        type: string
+        format: uuid

@@ -1,0 +1,67 @@
+# Rutas del recurso Notification. Ver docs/api/README.md para la convencion
+# de referencias entre archivos y docs/api/openapi.yaml para como se enlaza
+# cada path desde el documento raiz.
+#
+# Nota de persistencia: Notification se persiste en MongoDB, no en la base
+# relacional, pero se expone igual via REST.
+
+/users/me/notifications:
+  get:
+    operationId: listMyNotifications
+    summary: Listar las notificaciones del usuario autenticado (paginado).
+    tags: [Notifications]
+    parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+        description: Numero de pagina (0-indexado).
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+        description: Cantidad de elementos por pagina.
+    responses:
+      '200':
+        description: Pagina de notificaciones del usuario autenticado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/notification.yaml#/NotificationPage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+
+/notifications/{notification_id}/read:
+  patch:
+    operationId: markNotificationRead
+    summary: Marcar una notificacion como leida.
+    description: Marca el campo read en true para la notificacion indicada.
+    tags: [Notifications]
+    parameters:
+      - name: notification_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Identificador de la notificacion (ObjectId de Mongo).
+    responses:
+      '200':
+        description: Notificacion marcada como leida.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/notification.yaml#/Notification'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'

@@ -1,0 +1,54 @@
+# Rutas del recurso ActivityLogEntry. Ver docs/api/README.md para la
+# convencion de referencias entre archivos y docs/api/openapi.yaml para como
+# se enlaza cada path desde el documento raiz.
+#
+# Nota de persistencia: ActivityLogEntry se persiste en MongoDB, no en la
+# base relacional, pero se expone igual via REST.
+
+/projects/{project_id}/activity:
+  get:
+    operationId: listProjectActivity
+    summary: Listar el registro de actividad de un proyecto (paginado).
+    description: >-
+      Los items vienen ordenados por created_at descendente (la actividad
+      mas reciente primero).
+    tags: [Activity]
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador del proyecto cuya actividad se lista.
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+        description: Numero de pagina (0-indexado).
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+        description: Cantidad de elementos por pagina.
+    responses:
+      '200':
+        description: >-
+          Pagina del registro de actividad del proyecto, ordenada por
+          created_at descendente.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/activity.yaml#/ActivityLogPage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'

@@ -1,0 +1,86 @@
+# Schemas del recurso Comment. Ver docs/api/README.md para convenciones.
+#
+# Nota de persistencia: Comment se persiste en MongoDB (no en la base
+# relacional), pero se expone igual via REST con estos schemas. entity_type
+# es un string libre (ej "story", "task", "project") y entity_id es el uuid
+# del recurso relacional al que se refiere el comentario.
+
+Comment:
+  type: object
+  description: >-
+    Un comentario asociado a una entidad del dominio (story, task, project,
+    etc). Persistido en MongoDB; id es un ObjectId de Mongo, no un uuid.
+  properties:
+    id:
+      type: string
+      description: Identificador unico del comentario (ObjectId de Mongo).
+      example: 65f1a2b3c4d5e6f7a8b9c0d1
+    entity_type:
+      type: string
+      description: Tipo de entidad a la que pertenece el comentario.
+      example: story
+    entity_id:
+      type: string
+      format: uuid
+      description: Identificador de la entidad relacional a la que se refiere el comentario.
+      example: 9b1f2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
+    author_id:
+      type: string
+      format: uuid
+      description: Identificador del usuario autor del comentario.
+      example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+    body:
+      type: string
+      description: Contenido del comentario.
+      example: Falta validar el caso cuando el carrito esta vacio.
+    parent_comment_id:
+      type: string
+      nullable: true
+      description: >-
+        Id del comentario padre si este es una respuesta en un hilo. null si
+        es un comentario de nivel superior.
+      example: null
+    created_at:
+      type: string
+      format: date-time
+      description: Fecha/hora de creacion del comentario.
+      example: 2026-01-15T10:30:00Z
+  required:
+    - id
+    - entity_type
+    - entity_id
+    - author_id
+    - body
+    - created_at
+
+CommentPage:
+  type: object
+  description: Envelope paginado de Comment.
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Comment'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page
+
+CreateCommentRequest:
+  type: object
+  description: Datos para crear un comentario nuevo sobre una entidad.
+  properties:
+    body:
+      type: string
+      description: Contenido del comentario.
+      example: Falta validar el caso cuando el carrito esta vacio.
+    parent_comment_id:
+      type: string
+      nullable: true
+      description: >-
+        Id del comentario padre si este nuevo comentario es una respuesta en
+        un hilo. Omitir o enviar null para un comentario de nivel superior.
+      example: null
+  required:
+    - body

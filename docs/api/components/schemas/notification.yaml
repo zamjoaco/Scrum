@@ -1,0 +1,62 @@
+# Schemas del recurso Notification. Ver docs/api/README.md para
+# convenciones.
+#
+# Nota de persistencia: Notification se persiste en MongoDB (no en la base
+# relacional), pero se expone igual via REST con estos schemas.
+
+Notification:
+  type: object
+  description: >-
+    Una notificacion dirigida a un usuario. Persistido en MongoDB; id es un
+    ObjectId de Mongo, no un uuid.
+  properties:
+    id:
+      type: string
+      description: Identificador unico de la notificacion (ObjectId de Mongo).
+      example: 65f1a2b3c4d5e6f7a8b9c0d3
+    user_id:
+      type: string
+      format: uuid
+      description: Identificador del usuario destinatario de la notificacion.
+      example: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d
+    type:
+      type: string
+      description: Tipo de notificacion.
+      example: comment.mentioned
+    payload:
+      type: object
+      additionalProperties: true
+      description: Datos adicionales libres asociados a la notificacion, dependen del tipo.
+      example:
+        comment_id: 65f1a2b3c4d5e6f7a8b9c0d1
+        entity_type: story
+        entity_id: 9b1f2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
+    read:
+      type: boolean
+      description: Indica si el usuario ya marco la notificacion como leida.
+      example: false
+    created_at:
+      type: string
+      format: date-time
+      description: Fecha/hora de creacion de la notificacion.
+      example: 2026-01-15T10:30:00Z
+  required:
+    - id
+    - user_id
+    - type
+    - read
+    - created_at
+
+NotificationPage:
+  type: object
+  description: Envelope paginado de Notification.
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Notification'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page

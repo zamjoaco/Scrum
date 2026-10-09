@@ -1,0 +1,118 @@
+# Rutas del recurso Comment. Ver docs/api/README.md para la convencion de
+# referencias entre archivos y docs/api/openapi.yaml para como se enlaza
+# cada path desde el documento raiz.
+#
+# Nota de persistencia: Comment se persiste en MongoDB, no en la base
+# relacional, pero se expone igual via REST. entity_type es un string libre
+# (ej "story", "task", "project") y entity_id es el uuid del recurso
+# relacional al que se refiere el comentario.
+
+/entities/{entity_type}/{entity_id}/comments:
+  post:
+    operationId: createComment
+    summary: Crear un comentario nuevo sobre una entidad.
+    tags: [Comments]
+    parameters:
+      - name: entity_type
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Tipo de entidad a la que pertenece el comentario (ej "story", "task", "project").
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador de la entidad relacional a la que se refiere el comentario.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/comment.yaml#/CreateCommentRequest'
+    responses:
+      '201':
+        description: Comentario creado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/comment.yaml#/Comment'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  get:
+    operationId: listComments
+    summary: Listar los comentarios de una entidad (paginado).
+    tags: [Comments]
+    parameters:
+      - name: entity_type
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Tipo de entidad a la que pertenecen los comentarios (ej "story", "task", "project").
+      - name: entity_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identificador de la entidad relacional cuyos comentarios se listan.
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+        description: Numero de pagina (0-indexado).
+      - name: size
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 20
+        description: Cantidad de elementos por pagina.
+    responses:
+      '200':
+        description: Pagina de comentarios de la entidad.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/comment.yaml#/CommentPage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/comments/{comment_id}:
+  delete:
+    operationId: deleteComment
+    summary: Eliminar un comentario existente.
+    tags: [Comments]
+    parameters:
+      - name: comment_id
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Identificador del comentario (ObjectId de Mongo).
+    responses:
+      '204':
+        description: Comentario eliminado correctamente, sin contenido en la respuesta.
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'

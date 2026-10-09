@@ -1,0 +1,149 @@
+# Paths del recurso auth. Convencion: cada clave de primer nivel es el path
+# completo y su valor el Path Item Object estandar de OpenAPI. Ver
+# docs/api/README.md. Endpoints publicos -> security: [] explicito.
+
+/auth/register:
+  post:
+    tags:
+      - Auth
+    summary: Registrar un nuevo usuario
+    description: >-
+      Crea una cuenta y devuelve un par de tokens para autenticarse de
+      inmediato. Es un endpoint publico.
+    operationId: register
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/auth.yaml#/RegisterRequest'
+    responses:
+      '201':
+        description: Usuario registrado y autenticado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/AuthTokens'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '409':
+        $ref: '../components/responses/errors.yaml#/Conflict'
+
+/auth/login:
+  post:
+    tags:
+      - Auth
+    summary: Iniciar sesion
+    description: Autentica un usuario con email y password. Endpoint publico.
+    operationId: login
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/auth.yaml#/LoginRequest'
+    responses:
+      '200':
+        description: Autenticacion exitosa; devuelve los tokens.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/AuthTokens'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+
+/auth/refresh:
+  post:
+    tags:
+      - Auth
+    summary: Refrescar tokens
+    description: >-
+      Emite un nuevo par de tokens a partir de un refresh token valido.
+      Endpoint publico.
+    operationId: refreshToken
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/auth.yaml#/RefreshRequest'
+    responses:
+      '200':
+        description: Nuevo par de tokens emitido.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/auth.yaml#/AuthTokens'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+
+/auth/logout:
+  post:
+    tags:
+      - Auth
+    summary: Cerrar sesion
+    description: >-
+      Invalida la sesion actual (ej. revoca el refresh token del usuario
+      autenticado).
+    operationId: logout
+    security:
+      - bearerAuth: []
+    responses:
+      '204':
+        description: Sesion cerrada. Sin contenido.
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+
+/auth/password/reset-request:
+  post:
+    tags:
+      - Auth
+    summary: Solicitar restablecimiento de contrasena
+    description: >-
+      Envia un email con instrucciones si la cuenta existe. La respuesta es
+      siempre generica (202) y no revela si el email esta registrado.
+      Endpoint publico.
+    operationId: requestPasswordReset
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/auth.yaml#/PasswordResetRequest'
+    responses:
+      '202':
+        description: >-
+          Solicitud aceptada. Respuesta generica que no revela si el email
+          existe.
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+
+/auth/password/reset-confirm:
+  post:
+    tags:
+      - Auth
+    summary: Confirmar restablecimiento de contrasena
+    description: >-
+      Cambia la contrasena usando el token de un solo uso recibido por email.
+      Endpoint publico.
+    operationId: confirmPasswordReset
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/auth.yaml#/PasswordResetConfirmRequest'
+    responses:
+      '204':
+        description: Contrasena restablecida. Sin contenido.
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'

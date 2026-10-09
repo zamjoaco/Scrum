@@ -1,0 +1,125 @@
+# Path Item Objects del recurso Task. Ver docs/api/README.md para la
+# convencion de referencias. bearerAuth aplica globalmente (ver openapi.yaml).
+
+/stories/{story_id}/tasks:
+  parameters:
+    - name: story_id
+      in: path
+      required: true
+      description: Identificador de la UserStory.
+      schema:
+        type: string
+        format: uuid
+  post:
+    tags:
+      - tasks
+    operationId: createTask
+    summary: Crear una tarea en una historia
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/task.yaml#/CreateTaskRequest'
+    responses:
+      '201':
+        description: Tarea creada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/task.yaml#/Task'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  get:
+    tags:
+      - tasks
+    operationId: listTasks
+    summary: Listar tareas de una historia
+    parameters:
+      - name: page
+        in: query
+        required: false
+        description: Numero de pagina, 0-indexado.
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: size
+        in: query
+        required: false
+        description: Cantidad de elementos por pagina.
+        schema:
+          type: integer
+          format: int32
+          default: 20
+    responses:
+      '200':
+        description: Pagina de tareas de la historia.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/task.yaml#/TaskPage'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+
+/tasks/{task_id}:
+  parameters:
+    - name: task_id
+      in: path
+      required: true
+      description: Identificador de la Task.
+      schema:
+        type: string
+        format: uuid
+  patch:
+    tags:
+      - tasks
+    operationId: updateTask
+    summary: Actualizar parcialmente una tarea
+    description: >-
+      Aplica un merge patch: solo se modifican los campos presentes en el body.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/task.yaml#/UpdateTaskRequest'
+    responses:
+      '200':
+        description: Tarea actualizada.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/task.yaml#/Task'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
+  delete:
+    tags:
+      - tasks
+    operationId: deleteTask
+    summary: Eliminar una tarea
+    responses:
+      '204':
+        description: Tarea eliminada.
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '403':
+        $ref: '../components/responses/errors.yaml#/Forbidden'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'

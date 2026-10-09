@@ -1,0 +1,97 @@
+# Schemas reutilizables compartidos por todos los recursos.
+# Convencion: nombres de schema en PascalCase (ej UserStory), campos en
+# snake_case en el wire (ej first_name). Ver docs/api/README.md.
+
+ProblemDetail:
+  type: object
+  description: >-
+    Formato estandar de error (RFC 7807). Todas las respuestas de error
+    (ver components/responses/errors.yaml) usan este schema con
+    content-type application/problem+json.
+  properties:
+    type:
+      type: string
+      format: uri
+      description: Identificador URI del tipo de problema.
+      example: https://api.scrumapp.dev/errors/validation-error
+    title:
+      type: string
+      description: Resumen corto y legible del problema.
+      example: Solicitud invalida
+    status:
+      type: integer
+      format: int32
+      description: Codigo de estado HTTP repetido para conveniencia del cliente.
+      example: 400
+    detail:
+      type: string
+      description: Explicacion especifica de esta ocurrencia del problema.
+      example: El campo "title" es obligatorio.
+    instance:
+      type: string
+      format: uri
+      description: URI que identifica la ocurrencia especifica del problema.
+      example: /api/v1/projects/123
+    request_id:
+      type: string
+      description: Identificador de correlacion para logs/trazas (opcional).
+      example: 7f3b2c1a-9e4d-4a2b-8c3e-1d2f3a4b5c6d
+  required:
+    - type
+    - title
+    - status
+
+PageMetadata:
+  type: object
+  description: >-
+    Metadata de paginacion compartida por todos los envelopes paginados
+    (ver patron "*Page" mas abajo).
+  properties:
+    number:
+      type: integer
+      format: int32
+      description: Numero de pagina actual, 0-indexado.
+      example: 0
+    size:
+      type: integer
+      format: int32
+      description: Cantidad de elementos solicitados por pagina.
+      example: 20
+    total_elements:
+      type: integer
+      format: int64
+      description: Cantidad total de elementos en la coleccion completa.
+      example: 134
+    total_pages:
+      type: integer
+      format: int32
+      description: Cantidad total de paginas disponibles.
+      example: 7
+  required:
+    - number
+    - size
+    - total_elements
+    - total_pages
+
+# Patron de envelope paginado (convencion para los 4 workers siguientes):
+#
+# Cada recurso que se liste paginado define su propio schema "<Recurso>Page"
+# en su archivo paths/*.yaml (o en components/schemas/<recurso>.yaml si el
+# worker crea un archivo de schemas dedicado), con esta forma exacta:
+#
+#   ProjectPage:
+#     type: object
+#     properties:
+#       items:
+#         type: array
+#         items:
+#           $ref: '../components/schemas/project.yaml#/Project'
+#       page:
+#         $ref: './common.yaml#/PageMetadata'
+#     required:
+#       - items
+#       - page
+#
+# Es decir: "items" (array del recurso) + "page" ($ref a PageMetadata de
+# este archivo). No reinventar un esquema de paginacion por recurso: todos
+# reusan PageMetadata y solo cambian el tipo de "items".

@@ -1,0 +1,120 @@
+# Schemas del recurso Sprint. Ver docs/api/README.md para convenciones.
+
+Sprint:
+  type: object
+  description: Un sprint dentro de un Project.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico del sprint.
+      example: 2f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c
+    project_id:
+      type: string
+      format: uuid
+      description: Identificador del Project al que pertenece el sprint.
+      example: 9b1f2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
+    name:
+      type: string
+      description: Nombre del sprint.
+      example: Sprint 12
+    goal:
+      type: string
+      nullable: true
+      description: Objetivo del sprint.
+      example: Terminar el flujo de pagos con tarjeta.
+    start_date:
+      type: string
+      format: date
+      description: Fecha de inicio planificada del sprint.
+      example: 2026-01-19
+    end_date:
+      type: string
+      format: date
+      description: Fecha de fin planificada del sprint.
+      example: 2026-02-02
+    status:
+      type: string
+      description: Estado actual del sprint.
+      enum:
+        - PLANNED
+        - ACTIVE
+        - CLOSED
+      example: PLANNED
+  required:
+    - id
+    - project_id
+    - name
+    - start_date
+    - end_date
+    - status
+
+SprintPage:
+  type: object
+  description: Envelope paginado de Sprint.
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Sprint'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page
+
+CreateSprintRequest:
+  type: object
+  description: Datos para crear un sprint nuevo dentro de un Project.
+  properties:
+    name:
+      type: string
+      description: Nombre del sprint.
+      example: Sprint 12
+    goal:
+      type: string
+      nullable: true
+      description: Objetivo del sprint.
+      example: Terminar el flujo de pagos con tarjeta.
+    start_date:
+      type: string
+      format: date
+      description: Fecha de inicio planificada del sprint.
+      example: 2026-01-19
+    end_date:
+      type: string
+      format: date
+      description: Fecha de fin planificada del sprint.
+      example: 2026-02-02
+  required:
+    - name
+    - start_date
+    - end_date
+
+UpdateSprintRequest:
+  type: object
+  description: Datos editables de un sprint existente.
+  properties:
+    name:
+      type: string
+      description: Nombre del sprint.
+      example: Sprint 12 - extendido
+    goal:
+      type: string
+      nullable: true
+      description: Objetivo del sprint.
+      example: Terminar el flujo de pagos con tarjeta y tests e2e.
+    start_date:
+      type: string
+      format: date
+      description: Fecha de inicio planificada del sprint.
+      example: 2026-01-19
+    end_date:
+      type: string
+      format: date
+      description: Fecha de fin planificada del sprint.
+      example: 2026-02-09
+  required:
+    - name
+    - start_date
+    - end_date

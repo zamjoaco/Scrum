@@ -1,0 +1,97 @@
+# Schemas del recurso Task. Ver docs/api/README.md para convenciones.
+
+Task:
+  type: object
+  description: Una subtarea de una UserStory. Tiene su propio estado en el tablero.
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Identificador unico de la tarea.
+      example: 4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a
+    user_story_id:
+      type: string
+      format: uuid
+      description: Identificador de la UserStory a la que pertenece la tarea.
+      example: 3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f
+    status_id:
+      type: string
+      format: uuid
+      description: >-
+        Identificador de la BoardColumn que representa el estado actual de la
+        tarea.
+      example: 5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d
+    assignee_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Identificador del usuario asignado. null si no esta asignada.
+      example: 7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a
+    title:
+      type: string
+      description: Titulo de la tarea.
+      example: Diseñar el flujo de pago con tarjeta guardada
+    created_at:
+      type: string
+      format: date-time
+      description: Fecha/hora de creacion de la tarea.
+      example: 2026-01-15T11:00:00Z
+  required:
+    - id
+    - user_story_id
+    - status_id
+    - title
+    - created_at
+
+TaskPage:
+  type: object
+  description: Envelope paginado de Task.
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Task'
+    page:
+      $ref: './common.yaml#/PageMetadata'
+  required:
+    - items
+    - page
+
+CreateTaskRequest:
+  type: object
+  description: Datos para crear una tarea nueva dentro de una UserStory.
+  properties:
+    title:
+      type: string
+      description: Titulo de la tarea.
+      example: Diseñar el flujo de pago con tarjeta guardada
+    assignee_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Identificador del usuario asignado. null si queda sin asignar.
+      example: 7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a
+  required:
+    - title
+
+UpdateTaskRequest:
+  type: object
+  description: >-
+    Datos editables de una tarea existente (merge patch: solo se aplican los
+    campos presentes).
+  properties:
+    title:
+      type: string
+      description: Titulo de la tarea.
+      example: Diseñar el flujo de pago con tarjeta guardada (v2)
+    assignee_id:
+      type: string
+      format: uuid
+      nullable: true
+      description: Identificador del usuario asignado. null para desasignar.
+      example: 7d8e9f0a-1b2c-3d4e-5f6a-7b8c9d0e1f2a
+    status_id:
+      type: string
+      format: uuid
+      description: Identificador de la BoardColumn destino de la tarea.
+      example: 6b7c8d9e-0f1a-2b3c-4d5e-6f7a8b9c0d1e

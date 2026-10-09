@@ -1,0 +1,78 @@
+# Paths del recurso users. Convencion: cada clave de primer nivel es el path
+# completo y su valor el Path Item Object estandar de OpenAPI. Ver
+# docs/api/README.md. Requiere bearerAuth salvo donde se indique.
+
+/users/me:
+  get:
+    tags:
+      - Users
+    summary: Obtener perfil propio
+    description: Devuelve la informacion del usuario autenticado.
+    operationId: getCurrentUser
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Usuario autenticado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user.yaml#/User'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+  patch:
+    tags:
+      - Users
+    summary: Actualizar perfil propio
+    description: Actualiza los datos basicos del usuario autenticado.
+    operationId: updateCurrentUser
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/user.yaml#/UpdateUserRequest'
+    responses:
+      '200':
+        description: Usuario actualizado.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user.yaml#/User'
+      '400':
+        $ref: '../components/responses/errors.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+
+/users/{user_id}:
+  get:
+    tags:
+      - Users
+    summary: Obtener usuario
+    description: >-
+      Devuelve la informacion de un usuario solo si comparte workspace con el
+      usuario autenticado.
+    operationId: getUser
+    security:
+      - bearerAuth: []
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        description: Identificador del usuario.
+        schema:
+          type: string
+          format: uuid
+    responses:
+      '200':
+        description: Usuario encontrado (con visibilidad compartida).
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/user.yaml#/User'
+      '401':
+        $ref: '../components/responses/errors.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses/errors.yaml#/NotFound'
