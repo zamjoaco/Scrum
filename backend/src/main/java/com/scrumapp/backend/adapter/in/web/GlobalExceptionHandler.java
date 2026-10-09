@@ -1,6 +1,7 @@
 package com.scrumapp.backend.adapter.in.web;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.scrumapp.backend.domain.user.InvalidCredentialsException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.stream.Collectors;
@@ -38,6 +39,18 @@ public class GlobalExceptionHandler {
             responseBuilder.header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()));
         }
         return responseBuilder.body(body);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidCredentials(
+            InvalidCredentialsException ex, HttpServletRequest request) {
+        ProblemDetail body = buildProblemDetail(
+                ErrorTypes.UNAUTHORIZED,
+                "Credenciales invalidas",
+                HttpStatus.UNAUTHORIZED,
+                ex.getMessage(),
+                request);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
