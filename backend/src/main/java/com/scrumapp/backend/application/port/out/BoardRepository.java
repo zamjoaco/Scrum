@@ -10,6 +10,8 @@ import java.util.UUID;
  */
 public interface BoardRepository {
 
+    Optional<Board> findById(UUID id);
+
     Optional<Board> findByProjectId(UUID projectId);
 
     Board save(Board board);
